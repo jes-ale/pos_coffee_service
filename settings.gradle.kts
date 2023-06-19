@@ -1,0 +1,1 @@
+rootProject.name = "com.coffe_service.quadro.org.ktor-sample"
