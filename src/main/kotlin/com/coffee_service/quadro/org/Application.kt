@@ -5,7 +5,6 @@ import com.coffee_service.quadro.org.plugins.*
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 fun Application.module() {
-    configureServices()
     configureSockets()
     configureRouting()
     configureSerialization()

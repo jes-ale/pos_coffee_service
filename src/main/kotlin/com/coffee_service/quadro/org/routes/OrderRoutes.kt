@@ -1,9 +1,13 @@
 package com.coffee_service.quadro.org.routes
 
+import com.coffee_service.quadro.org.model.Order
 import io.ktor.server.routing.*
 
-fun Route.workOrders() {
-    route ("/work_order") {
+object OrderCache {
+   private val orderQueue = mutableListOf<Order>()
+}
+fun Route.order() {
+    route ("/order") {
         get {
 
         }
