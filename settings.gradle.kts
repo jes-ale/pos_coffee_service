@@ -1,1 +1,1 @@
-rootProject.name = "com.coffe_service.quadro.org.ktor-sample"
+rootProject.name = "com.coffee_service.quadro.org.manufacture_service"

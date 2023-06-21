@@ -1,11 +1,11 @@
-package com.coffe_service.quadro.org
+package com.coffee_service.quadro.org
 
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.server.testing.*
 import kotlin.test.*
 import io.ktor.http.*
-import com.coffe_service.quadro.org.plugins.*
+import com.coffee_service.quadro.org.plugins.configureRouting
 
 class ApplicationTest {
     @Test

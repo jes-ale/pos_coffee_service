@@ -1,4 +1,4 @@
-package com.coffe_service.quadro.org.plugins
+package com.coffee_service.quadro.org.plugins
 
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
@@ -9,15 +9,16 @@ import io.ktor.server.application.*
 import io.ktor.server.routing.*
 
 fun Application.configureSecurity() {
-    
+
     // Please read the jwt property from the config file if you are using EngineMain
-    val jwtAudience = "jwt-audience"
-    val jwtDomain = "https://jwt-provider-domain/"
-    val jwtRealm = "ktor sample app"
-    val jwtSecret = "secret"
+    log.info(environment.config.toMap()["ktor"].toString())
+    val jwtAudience = environment.config.property("jwt.audience").getString()
+    val jwtDomain = environment.config.property("jwt.issuer").getString()
+    val jwtRealm = environment.config.property("jwt.realm").getString()
+    val jwtSecret = environment.config.property("jwt.secret").getString()
     authentication {
         jwt {
-            realm = jwtRealm
+            realm = jwtRealm ?: "void"
             verifier(
                 JWT
                     .require(Algorithm.HMAC256(jwtSecret))
@@ -31,19 +32,8 @@ fun Application.configureSecurity() {
         }
     }
     authentication {
-        basic(name = "myauth1") {
-            realm = "Ktor Server"
-            validate { credentials ->
-                if (credentials.name == credentials.password) {
-                    UserIdPrincipal(credentials.name)
-                } else {
-                    null
-                }
-            }
-        }
-    
-        form(name = "myauth2") {
-            userParamName = "user"
+        form(name = "caffenio_select_admin") {
+            userParamName = "username"
             passwordParamName = "password"
             challenge {
                 /**/
@@ -51,13 +41,7 @@ fun Application.configureSecurity() {
         }
     }
     routing {
-        authenticate("myauth1") {
-            get("/protected/route/basic") {
-                val principal = call.principal<UserIdPrincipal>()!!
-                call.respondText("Hello ${principal.name}")
-            }
-        }
-        authenticate("myauth2") {
+        authenticate("caffenio_select_admin") {
             get("/protected/route/form") {
                 val principal = call.principal<UserIdPrincipal>()!!
                 call.respondText("Hello ${principal.name}")

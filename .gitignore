@@ -36,4 +36,4 @@ out/
 .vscode/
 
 ## SECRET
-*.conf
+*.env

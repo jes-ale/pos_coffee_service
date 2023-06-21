@@ -1,4 +1,4 @@
-package com.coffe_service.quadro.org.plugins
+package com.coffee_service.quadro.org.plugins
 
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
