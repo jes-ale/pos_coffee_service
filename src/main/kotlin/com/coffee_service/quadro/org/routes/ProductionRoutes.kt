@@ -1,6 +1,7 @@
 package com.coffee_service.quadro.org.routes
 
 import com.coffee_service.quadro.org.model.Production
+import com.coffee_service.quadro.org.service.HealthCheck
 import com.coffee_service.quadro.org.service.ProductionService.queryProduction
 import com.coffee_service.quadro.org.service.ProductionService.storeProduction
 import com.coffee_service.quadro.org.service.HealthCheck.healthCheck
@@ -13,9 +14,10 @@ import io.ktor.server.routing.*
 fun Route.production() {
     route("/version") {
         get {
-            val version = healthCheck()
+            val version = runCatching { healthCheck() }.getOrNull()
+            call.application.environment.log.info("${HealthCheck.env["rpc.host"]}")
             call.application.environment.log.info("$version")
-            call.respond(version)
+            call.respond(version?:"problem with rpc service")
         }
     }
     route("/production") {
