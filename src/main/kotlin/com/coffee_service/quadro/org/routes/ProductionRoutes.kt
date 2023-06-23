@@ -18,14 +18,9 @@ fun Route.production() {
         get {
             val productionConfirmed = RpcApi.queryProduction()
             call.application.environment.log.info(productionConfirmed.toString())
-            call.respond(productionConfirmed)
-        }
-        post {
-            val customer = call.receive<Production>()
-            call.respondText("Production order stored correctly", status = HttpStatusCode.Created)
-        }
-        delete("{id?}") {
-
+            if (productionConfirmed.isEmpty())
+                call.respondText("Production orders empty", status = HttpStatusCode.OK)
+            call.respond(HttpStatusCode.OK, productionConfirmed)
         }
     }
 }
