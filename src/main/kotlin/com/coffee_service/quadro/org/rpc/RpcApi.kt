@@ -32,8 +32,8 @@ object RpcApi {
     fun queryProduction(): List<Production> {
         val domain = mutableMapOf<String, Any>()
         domain["fields"] = listOf(
-            "id", "date_deadline", "date_finished", "display_name", "origin", "name", "priority", "product_qty", "state"
-        )
+            "id", "date_deadline", "date_finished", "display_name", "origin", "name", "priority", "product_qty", "state", "product_id","move_raw_ids"
+        )// TODO: generate field list based on serializable Model fields
         domain["limit"] = 5 // TODO: allow customize limit by user interface
         return kwQuery<Production>(
             pMethodName = "execute_kw",
