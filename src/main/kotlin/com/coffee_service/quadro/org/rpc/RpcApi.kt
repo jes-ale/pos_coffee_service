@@ -29,10 +29,31 @@ object RpcApi {
         ) as Int
     }
 
+    fun markAsDone(id: Int): List<Boolean> {
+        val domain = mutableMapOf<String, Any>()
+        return kwQuery<Boolean>(
+            pMethodName = "execute_kw",
+            model = "mrp.production",
+            kw = "markAsDone",
+            domain = domain.toMap(),
+            params = listOf(id)
+        )
+    }
+
     fun queryProduction(): List<Production> {
         val domain = mutableMapOf<String, Any>()
         domain["fields"] = listOf(
-            "id", "date_deadline", "date_finished", "display_name", "origin", "name", "priority", "product_qty", "state", "product_id","move_raw_ids"
+            "id",
+            "date_deadline",
+            "date_finished",
+            "display_name",
+            "origin",
+            "name",
+            "priority",
+            "product_qty",
+            "state",
+            "product_id",
+            "move_raw_ids"
         )// TODO: generate field list based on serializable Model fields
         domain["limit"] = 5 // TODO: allow customize limit by user interface
         return kwQuery<Production>(
@@ -44,7 +65,6 @@ object RpcApi {
         )
     }
     //TODO: query mrp.production extra stock.move lines
-
 
     private inline fun <reified T> kwQuery(
         pMethodName: String,

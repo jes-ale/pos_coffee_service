@@ -10,4 +10,5 @@ fun Application.module() {
     configureSerialization()
     configureHTTP()
     configureSecurity()
+    configureTemplating()
 }
