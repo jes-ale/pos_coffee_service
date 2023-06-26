@@ -1,5 +1,6 @@
 package com.coffee_service.quadro.org.rpc
 
+import com.coffee_service.quadro.org.model.Product
 import com.coffee_service.quadro.org.model.Production
 import kotlinx.serialization.json.*
 import org.apache.xmlrpc.client.XmlRpcClient
@@ -64,7 +65,24 @@ object RpcApi {
             params = listOf(listOf(listOf("state", "=", "confirmed"))), // may god have mercy upon us
         )
     }
+
     //TODO: query mrp.production extra stock.move lines
+    fun queryComponent(ids: List<Int>): List<Product> {
+        val domain = mutableMapOf<String, Any>()
+        domain["fields"] = listOf(
+            "id",
+            "product_id",
+            "product_uom_qty"
+        )
+        domain["limit"] = 5
+        return kwQuery<Product>(
+            pMethodName = "execute_kw",
+            model = "stock.move",
+            kw = "search_read",
+            domain = domain.toMap(),
+            params = listOf(ids)
+        )
+    }
 
     private inline fun <reified T> kwQuery(
         pMethodName: String,

@@ -16,14 +16,17 @@ data class Production(
     val state: String,
     val product_id: JsonArray,
     val move_raw_ids: JsonArray,
+    var components: List<Product>?
     //val workorder_ids: JsonArray
     //val picking_ids: List<Int>,
     //val product_tmpl_id: Int,
     //val product_uom_id: Int,
     // val user_id:
 )
+
 @Serializable
 data class Product(
     val id: Int,
-    val name: String,
+    val product_id: JsonArray,
+    val product_uom_qty: Int
 )

@@ -2,6 +2,8 @@ package com.coffee_service.quadro.org.routes
 
 import com.coffee_service.quadro.org.model.Order
 import com.coffee_service.quadro.org.model.Production
+import com.coffee_service.quadro.org.routes.OrderCache.addLast
+import com.coffee_service.quadro.org.routes.OrderCache.getNext
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -22,13 +24,13 @@ object OrderCache {
 fun Route.order() {
     route("/order") {
         get {
-            val order = OrderCache.getNext()
+            val order = getNext()
             if (order != null) call.respond<List<Order>>(order)
             else call.respondText("Orders empty", status = HttpStatusCode.OK)
         }
         post {
             val order = call.receive<List<Order>>()
-            if (OrderCache.addLast(order)) call.respondText(
+            if (addLast(order)) call.respondText(
                 "PoS order stored correctly",
                 status = HttpStatusCode.Created
             )
