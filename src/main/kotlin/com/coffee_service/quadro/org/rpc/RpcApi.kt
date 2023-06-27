@@ -1,7 +1,6 @@
 package com.coffee_service.quadro.org.rpc
 
-import com.coffee_service.quadro.org.model.Product
-import com.coffee_service.quadro.org.model.Production
+import com.coffee_service.quadro.org.model.*
 import kotlinx.serialization.json.*
 import org.apache.xmlrpc.client.XmlRpcClient
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl
@@ -20,6 +19,26 @@ object RpcApi {
             models_config.serverURL = URL("http://$host:$port/xmlrpc/2/object")
             client.execute(common_config, "version", listOf<Any>())
         }.getOrNull()
+    }
+
+    private inline fun <reified T> kwQuery(
+        pMethodName: String, model: String, kw: String, domain: Map<String, Any>, params: List<Any>
+    ): List<T> {
+        return (client.execute(
+            models_config, pMethodName, listOf(
+                this.db,
+                this.uid,
+                this.password,
+                model,
+                kw,
+                params,
+                domain,
+            )
+        ) as Array<*>).map {
+            Json.decodeFromJsonElement<T>(
+                it.toJsonElement()
+            )
+        }
     }
 
     fun login(username: String, password: String, database: String) {
@@ -41,7 +60,21 @@ object RpcApi {
         )
     }
 
-    fun queryProduction(): List<Production> {
+    private fun queryStockMove(ids: List<Int>): List<StockMove> {
+        val domain = mutableMapOf<String, Any>()
+        domain["fields"] = listOf(
+            "id", "product_id", "product_uom_qty"
+        )
+        return kwQuery<StockMove>(
+            pMethodName = "execute_kw",
+            model = "stock.move",
+            kw = "read",
+            domain = domain.toMap(),
+            params = listOf(ids)
+        )
+    }
+
+    fun queryProduction(): List<ProductionPayload> {
         val domain = mutableMapOf<String, Any>()
         domain["fields"] = listOf(
             "id",
@@ -57,58 +90,45 @@ object RpcApi {
             "move_raw_ids"
         )// TODO: generate field list based on serializable Model fields
         domain["limit"] = 5 // TODO: allow customize limit by user interface
-        return kwQuery<Production>(
+        val payload = kwQuery<Production>(
             pMethodName = "execute_kw",
             model = "mrp.production",
             kw = "search_read",
             domain = domain.toMap(),
-            params = listOf(listOf(listOf("state", "=", "confirmed"))), // may god have mercy upon us
+            params = listOf(listOf(listOf("state", "=", "confirmed"))),
         )
-    }
-
-    //TODO: query mrp.production extra stock.move lines
-    fun queryComponent(ids: List<Int>): List<Product> {
-        val domain = mutableMapOf<String, Any>()
-        domain["fields"] = listOf(
-            "id",
-            "product_id",
-            "product_uom_qty"
-        )
-        domain["limit"] = 5
-        return kwQuery<Product>(
-            pMethodName = "execute_kw",
-            model = "stock.move",
-            kw = "search_read",
-            domain = domain.toMap(),
-            params = listOf(ids)
-        )
-    }
-
-    private inline fun <reified T> kwQuery(
-        pMethodName: String,
-        model: String,
-        kw: String,
-        domain: Map<String, Any>,
-        params: List<Any>
-    ): List<T> {
-        return (client.execute(
-            models_config, pMethodName, listOf(
-                this.db,
-                this.uid,
-                this.password,
-                model,
-                kw,
-                params,
-                domain,
-            )
-        ) as Array<*>)
-            .map {
-                Json.decodeFromJsonElement<T>(
-                    it.toJsonElement()
+        val body = mutableListOf<ProductionPayload>()
+        for (production in payload) {
+            val productId = Json.decodeFromJsonElement<Int>(production.product_id[0])
+            val productDisplayName = Json.decodeFromJsonElement<String>(production.product_id[1])
+            val rawStockMoveIds = Json.decodeFromJsonElement<List<Int>>(production.move_raw_ids)
+            val rawStockMove = queryStockMove(rawStockMoveIds)
+            val components = mutableListOf<ComponentPayload>()
+            for (comp in rawStockMove) {
+                components.add(
+                    ComponentPayload(
+                        display_name = Json.decodeFromJsonElement<String>(comp.product_id[1]),
+                        qty = comp.product_uom_qty
+                    )
                 )
             }
+            body.add(
+                ProductionPayload(
+                    id = production.id,
+                    display_name = production.display_name,
+                    origin = production.origin,
+                    priority = production.priority,
+                    state = production.state,
+                    product = ProductPayload(
+                        id = productId,
+                        display_name = productDisplayName,
+                    ),
+                    component = components,
+                )
+            )
+        }
+        return body
     }
-
 
     /**
      * https://github.com/Kotlin/kotlinx.serialization/issues/746#issuecomment-737000705
@@ -148,30 +168,3 @@ object RpcApi {
         return JsonObject(map)
     }
 }
-
-
-/*
-    fun queryProduction(): List<Production> {
-        val domain = mutableMapOf<String, Any>()
-        domain["fields"] = listOf(
-            "id", "date_deadline", "date_finished", "display_name", "origin", "name", "priority", "product_qty", "state"
-        )
-        domain["limit"] = 5 // TODO: allow customize limit by user interface
-        return (client.execute(
-            models_config, "execute_kw", listOf(
-                this.db,
-                this.uid,
-                this.password,
-                "mrp.production",
-                "search_read",
-                listOf(listOf(listOf("state", "=", "confirmed"))), // may god have mercy upon us
-                domain,
-            )
-        ) as Array<*>)
-            .map {
-                Json.decodeFromJsonElement<Production>(
-                    it.toJsonElement()
-                )
-            }
-    }
-*/

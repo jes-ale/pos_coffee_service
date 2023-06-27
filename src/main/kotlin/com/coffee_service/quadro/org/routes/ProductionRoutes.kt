@@ -1,27 +1,27 @@
 package com.coffee_service.quadro.org.routes
 
-import com.coffee_service.quadro.org.model.Production
+import com.coffee_service.quadro.org.model.ProductionPayload
 import com.coffee_service.quadro.org.routes.ProductionCache.getNext
 import com.coffee_service.quadro.org.routes.ProductionCache.updateCache
 import com.coffee_service.quadro.org.rpc.RpcApi.markAsDone
-import com.coffee_service.quadro.org.rpc.RpcApi.queryComponent
 import com.coffee_service.quadro.org.rpc.RpcApi.queryProduction
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.serialization.json.*
 
 object ProductionCache {
-    private val productionQueue = mutableListOf<Production>()
-    fun updateCache(production: List<Production>) {
-        production.forEachIndexed { index, item ->
-            productionQueue.add(item)
+    private val productionQueue = mutableListOf<ProductionPayload>()
+    fun updateCache(production: List<ProductionPayload>) {
+        val ids = productionQueue.map { it.id }
+        production.forEachIndexed { _, item ->
+            if (!ids.contains(item.id)) // each mrp.production can only be cached 1 time per on/off service or cache flushed
+                productionQueue.add(item)
         }
     }
 
-    fun getNext(): Production? {
+    fun getNext(): ProductionPayload? {
         return productionQueue.removeFirstOrNull()
     }
 }
@@ -37,11 +37,6 @@ fun Route.production() {
             if (body == null)
                 call.respondText("Production orders empty", status = HttpStatusCode.OK)
             else {
-                val ids = body.move_raw_ids.map {
-                    Json.decodeFromJsonElement<Int>(it)
-                }
-                val components = queryComponent(ids)
-                body.components = components
                 call.respond(HttpStatusCode.OK, body)
             }
         }
