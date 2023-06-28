@@ -31,14 +31,13 @@ fun Route.production() {
         get {
             val productionConfirmed = queryProduction()
             if (productionConfirmed.isEmpty())
-                call.respondText("Production orders empty", status = HttpStatusCode.OK)
+                call.respond(HttpStatusCode.OK, "Production orders empty")
             updateCache(productionConfirmed)
             val body = getNext()
             if (body == null)
-                call.respondText("Production orders empty", status = HttpStatusCode.OK)
-            else {
+                call.respond(HttpStatusCode.OK, "Production orders empty")
+            else
                 call.respond(HttpStatusCode.OK, body)
-            }
         }
         post {
             val id = call.receive<Int>()
@@ -46,7 +45,7 @@ fun Route.production() {
             if (done[0])
                 call.respond(HttpStatusCode.OK, id)
             else
-                call.respondText("Production not marked as done", status = HttpStatusCode.InternalServerError)
+                call.respond(HttpStatusCode.InternalServerError, "Production not marked as done")
         }
     }
 }
