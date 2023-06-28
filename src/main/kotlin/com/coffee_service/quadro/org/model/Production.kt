@@ -28,7 +28,7 @@ data class Production(
     val date_deadline: Boolean,
     val date_finished: Boolean,
     val display_name: String,
-    val origin: String,
+    val origin: String?,
     val name: String,
     val priority: String,
     val product_qty: Double,

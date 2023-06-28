@@ -116,7 +116,7 @@ object RpcApi {
                 ProductionPayload(
                     id = production.id,
                     display_name = production.display_name,
-                    origin = production.origin,
+                    origin = production.origin ?: "",
                     priority = production.priority,
                     state = production.state,
                     product = ProductPayload(
