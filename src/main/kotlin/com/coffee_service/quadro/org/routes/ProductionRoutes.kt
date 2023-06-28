@@ -43,7 +43,7 @@ fun Route.production() {
         post {
             val id = call.receive<IdPayload>()
             val done = markAsDone(id.id)
-            if (done[0])
+            if (done)
                 call.respond(HttpStatusCode.OK, id.id)
             else
                 call.respond(HttpStatusCode.InternalServerError, "Production not marked as done")

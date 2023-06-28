@@ -41,6 +41,25 @@ object RpcApi {
         }
     }
 
+    private fun kwCall(
+        pMethodName: String, model: String, kw: String, domain: Map<String, Any>, params: List<Any?>
+    ): Boolean {
+        val res = client.execute(
+            models_config, pMethodName, listOf(
+                this.db,
+                this.uid,
+                this.password,
+                model,
+                kw,
+                params,
+                domain,
+            )
+        )
+        val body = res.toJsonElement()
+        return body.toString().isNotEmpty()
+    }
+
+
     fun login(username: String, password: String, database: String) {
         this.db = database
         this.password = password
@@ -49,14 +68,14 @@ object RpcApi {
         ) as Int
     }
 
-    fun markAsDone(id: Int): List<Boolean> {
+    fun markAsDone(id: Int): Boolean {
         val domain = mutableMapOf<String, Any>()
-        return kwQuery<Boolean>(
+        return kwCall(
             pMethodName = "execute_kw",
             model = "mrp.production",
-            kw = "markAsDone",
-            domain = domain.toMap(),
-            params = listOf(id)
+            kw = "mark_as_done",
+            params = listOf(id, id),
+            domain = domain.toMap()
         )
     }
 
@@ -66,11 +85,7 @@ object RpcApi {
             "id", "product_id", "product_uom_qty"
         )
         return kwQuery<StockMove>(
-            pMethodName = "execute_kw",
-            model = "stock.move",
-            kw = "read",
-            domain = domain.toMap(),
-            params = listOf(ids)
+            pMethodName = "execute_kw", model = "stock.move", kw = "read", domain = domain.toMap(), params = listOf(ids)
         )
     }
 
