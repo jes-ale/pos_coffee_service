@@ -26,15 +26,15 @@ fun Route.order() {
         get {
             val order = getNext()
             if (order != null) call.respond<List<Order>>(order)
-            else call.respondText("Orders empty", status = HttpStatusCode.OK)
+            else call.respond(HttpStatusCode.OK, "Orders empty")
         }
         post {
             val order = call.receive<List<Order>>()
-            if (addLast(order)) call.respondText(
-                "PoS order stored correctly",
-                status = HttpStatusCode.Created
+            if (addLast(order)) call.respond(
+                HttpStatusCode.OK,
+                "PoS order stored"
             )
-            else call.respondText("PoS order not stored")
+            else call.respond(HttpStatusCode.InternalServerError, "PoS order not stored")
         }
     }
 }

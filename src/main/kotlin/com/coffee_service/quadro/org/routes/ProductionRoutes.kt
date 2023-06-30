@@ -10,6 +10,7 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.serialization.Serializable
 
 object ProductionCache {
     private val productionQueue = mutableListOf<List<ProductionPayload>>()
@@ -28,23 +29,27 @@ fun Route.production() {
         get {
             val productionConfirmed = queryProduction()
             if (productionConfirmed.isEmpty())
-                call.respondText("Production orders empty", status = HttpStatusCode.OK)
+                call.respond(HttpStatusCode.OK, "Production orders empty")
             val sortedProduction = listOf(productionConfirmed)
             updateCache(sortedProduction)
             val body = getNext()
             if (body == null)
-                call.respondText("Production orders empty", status = HttpStatusCode.OK)
-            else {
+                call.respond(HttpStatusCode.OK, "Production orders empty")
+            else
                 call.respond(HttpStatusCode.OK, body)
-            }
         }
         post {
-            val id = call.receive<Int>()
-            val done = markAsDone(id)
-            if (done[0])
-                call.respond(HttpStatusCode.OK, id)
+            val id = call.receive<IdPayload>()
+            val done = markAsDone(id.id)
+            if (done)
+                call.respond(HttpStatusCode.OK, id.id)
             else
-                call.respondText("Production not marked as done", status = HttpStatusCode.InternalServerError)
+                call.respond(HttpStatusCode.InternalServerError, "Production not marked as done")
         }
     }
 }
+
+@Serializable
+data class IdPayload(
+    val id: Int
+)
