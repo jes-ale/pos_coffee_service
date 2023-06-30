@@ -11,27 +11,27 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
+import java.util.stream.Collectors
 
 object ProductionCache {
     private val productionQueue = mutableListOf<List<ProductionPayload>>()
-    fun updateCache(production: List<List<ProductionPayload>>) {
-        // TODO: agrupar por order_id
+    fun updateCache(production: List<ProductionPayload>) {
+        production
+            .map { it.origin }
+            .stream().distinct().collect(Collectors.toList())
+            .forEach { productionQueue.add(production.filter { p -> p.origin == it }) }
     }
 
-    fun getNext(): List<ProductionPayload>? {
-        //TODO: get next by orderid
-        throw Exception("not yet implemented")
-    }
+    fun getNext(): List<ProductionPayload>? = productionQueue.removeFirstOrNull()
 }
 
 fun Route.production() {
     route("/production") {
         get {
-            val productionConfirmed = queryProduction()
-            if (productionConfirmed.isEmpty())
+            val production = queryProduction()
+            if (production.isEmpty())
                 call.respond(HttpStatusCode.OK, "Production orders empty")
-            val sortedProduction = listOf(productionConfirmed)
-            updateCache(sortedProduction)
+            updateCache(production)
             val body = getNext()
             if (body == null)
                 call.respond(HttpStatusCode.OK, "Production orders empty")
