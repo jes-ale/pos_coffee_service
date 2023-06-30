@@ -43,10 +43,10 @@ fun Route.production() {
       if (done) call.respond(HttpStatusCode.OK, id.id)
       else call.respond(HttpStatusCode.InternalServerError, "Production not marked as done")
     }
-    post("/production/setNext") {
+    post("/setNext") {
       val uid = call.receive<UidPayload>()
       setNext(uid.uid)
-  }
+    }
   }
 
 }
