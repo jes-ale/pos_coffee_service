@@ -2,6 +2,7 @@ package com.coffee_service.quadro.org.routes
 
 import com.coffee_service.quadro.org.model.ProductionPayload
 import com.coffee_service.quadro.org.routes.ProductionCache.getNext
+import com.coffee_service.quadro.org.routes.ProductionCache.setNext
 import com.coffee_service.quadro.org.routes.ProductionCache.updateCache
 import com.coffee_service.quadro.org.rpc.RpcApi.markAsDone
 import com.coffee_service.quadro.org.rpc.RpcApi.queryProduction
@@ -42,11 +43,14 @@ fun Route.production() {
       if (done) call.respond(HttpStatusCode.OK, id.id)
       else call.respond(HttpStatusCode.InternalServerError, "Production not marked as done")
     }
-    post("/setNext") {
-      val uid = call.receive<String>()
-      setNext(uid)
-    }
+    post("/production/setNext") {
+      val uid = call.receive<UidPayload>()
+      setNext(uid.uid)
   }
+  }
+
 }
 
 @Serializable data class IdPayload(val id: Int)
+
+@Serializable data class UidPayload(val uid: String)
