@@ -122,7 +122,7 @@ object RpcApi {
             "product_id",
             "move_raw_ids"
         ) // TODO: generate field list based on serializable Model fields
-    domain["limit"] = 5 // TODO: allow customize limit by user interface
+    domain["limit"] = 100 // TODO: allow customize limit by user interface
     val payload =
         kwQuery<Production>(
             pMethodName = "execute_kw",

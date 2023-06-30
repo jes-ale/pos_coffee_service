@@ -1,7 +1,9 @@
 package com.coffee_service.quadro.org.routes
 
 import com.coffee_service.quadro.org.model.ProductionPayload
+import com.coffee_service.quadro.org.routes.ProductionCache.getCache
 import com.coffee_service.quadro.org.routes.ProductionCache.getNext
+import com.coffee_service.quadro.org.routes.ProductionCache.getQueue
 import com.coffee_service.quadro.org.routes.ProductionCache.setNext
 import com.coffee_service.quadro.org.routes.ProductionCache.updateCache
 import com.coffee_service.quadro.org.rpc.RpcApi.markAsDone
@@ -25,6 +27,12 @@ object ProductionCache {
   fun setNext(origin: String) = productionQueue.add(origin)
   fun getNext(): List<ProductionPayload>? =
       runCatching { productionCache[productionQueue.removeFirstOrNull()] }.getOrDefault(null)
+  fun getQueue(): List<String> {
+    return productionQueue
+  }
+  fun getCache(): Map<String, List<ProductionPayload>> {
+    return productionCache
+  }
 }
 
 fun Route.production() {
@@ -34,6 +42,7 @@ fun Route.production() {
       if (production.isEmpty()) call.respond(HttpStatusCode.OK, "Production orders empty")
       updateCache(production)
       val body = getNext()
+      call.application.environment.log.info(body.toString())
       if (body == null) call.respond(HttpStatusCode.OK, "Production orders empty")
       else call.respond(HttpStatusCode.OK, body)
     }
@@ -43,12 +52,16 @@ fun Route.production() {
       if (done) call.respond(HttpStatusCode.OK, id.id)
       else call.respond(HttpStatusCode.InternalServerError, "Production not marked as done")
     }
-    post("/setNext") {
+  }
+  route("/setNextProduction") {
+    post {
       val uid = call.receive<UidPayload>()
       setNext(uid.uid)
+      call.respond(HttpStatusCode.OK, uid.uid)
     }
   }
-
+  route("/getProductionQueue") { get { call.respond(HttpStatusCode.OK, getQueue()) } }
+  route("/getProductionCache") { get { call.respond(HttpStatusCode.OK, getCache()) } }
 }
 
 @Serializable data class IdPayload(val id: Int)
