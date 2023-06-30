@@ -102,7 +102,8 @@ object RpcApi {
             "product_qty",
             "state",
             "product_id",
-            "move_raw_ids"
+            "move_raw_ids",
+            "commanda_id"
         )// TODO: generate field list based on serializable Model fields
         domain["limit"] = 5 // TODO: allow customize limit by user interface
         val payload = kwQuery<Production>(
@@ -117,6 +118,7 @@ object RpcApi {
             val productId = Json.decodeFromJsonElement<Int>(production.product_id[0])
             val productDisplayName = Json.decodeFromJsonElement<String>(production.product_id[1])
             val rawStockMoveIds = Json.decodeFromJsonElement<List<Int>>(production.move_raw_ids)
+            val comandaId = Json.decodeFromJsonElement<Int>(production.comanda_id[0])
             val rawStockMove = queryStockMove(rawStockMoveIds)
             val components = mutableListOf<ComponentPayload>()
             for (comp in rawStockMove) {
@@ -130,6 +132,7 @@ object RpcApi {
             body.add(
                 ProductionPayload(
                     id = production.id,
+                    order_id = comandaId,
                     display_name = production.display_name,
                     origin = production.origin ?: "",
                     priority = production.priority,

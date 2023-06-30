@@ -5,6 +5,7 @@ import kotlinx.serialization.json.JsonArray
 @Serializable
 data class ProductionPayload(
     val id: Int,
+    val order_id: Int,
     val display_name: String,
     val origin: String,
     val priority: String,
@@ -34,6 +35,7 @@ data class Production(
     val product_qty: Double,
     val state: String,
     val product_id: JsonArray,
+    val comanda_id: JsonArray,
     val move_raw_ids: JsonArray,
     //val workorder_ids: JsonArray
     //val picking_ids: List<Int>,
