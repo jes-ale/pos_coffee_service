@@ -1,9 +1,9 @@
 package com.coffee_service.quadro.org.routes
 
 import com.coffee_service.quadro.org.model.Order
-import com.coffee_service.quadro.org.model.Production
 import com.coffee_service.quadro.org.routes.OrderCache.addLast
 import com.coffee_service.quadro.org.routes.OrderCache.getNext
+import com.coffee_service.quadro.org.routes.ProductionCache.setNext
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -17,6 +17,7 @@ object OrderCache {
     }
 
     fun addLast(order: List<Order>): Boolean {
+        setNext(order[0].uid)
         return orderQueue.add(order)
     }
 }
@@ -30,10 +31,7 @@ fun Route.order() {
         }
         post {
             val order = call.receive<List<Order>>()
-            if (addLast(order)) call.respond(
-                HttpStatusCode.OK,
-                "PoS order stored"
-            )
+            if (addLast(order)) call.respond(HttpStatusCode.OK, "PoS order stored")
             else call.respond(HttpStatusCode.InternalServerError, "PoS order not stored")
         }
     }

@@ -10,46 +10,39 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.serialization.Serializable
 import java.util.stream.Collectors
+import kotlinx.serialization.Serializable
 
 object ProductionCache {
-    private val productionQueue = mutableListOf<List<ProductionPayload>>()
+    private val productionCache = mutableMapOf<String, List<ProductionPayload>>()
+    private val productionQueue = mutableListOf<String>()
     fun updateCache(production: List<ProductionPayload>) {
-        production
-            .map { it.origin }
-            .stream().distinct().collect(Collectors.toList())
-            .forEach { productionQueue.add(production.filter { p -> p.origin == it }) }
+        production.map { it.origin }.stream().distinct().collect(Collectors.toList()).forEach {
+            productionCache[it] = production.filter { p -> p.origin == it }
+        }
     }
-
-    fun getNext(): List<ProductionPayload>? = productionQueue.removeFirstOrNull()
+    fun setNext(origin: String) = productionQueue.add(origin)
+    fun getNext(): List<ProductionPayload>? =
+            runCatching { productionCache[productionQueue.removeFirstOrNull()] }.getOrDefault(null)
 }
 
 fun Route.production() {
     route("/production") {
         get {
             val production = queryProduction()
-            if (production.isEmpty())
-                call.respond(HttpStatusCode.OK, "Production orders empty")
+            if (production.isEmpty()) call.respond(HttpStatusCode.OK, "Production orders empty")
             updateCache(production)
             val body = getNext()
-            if (body == null)
-                call.respond(HttpStatusCode.OK, "Production orders empty")
-            else
-                call.respond(HttpStatusCode.OK, body)
+            if (body == null) call.respond(HttpStatusCode.OK, "Production orders empty")
+            else call.respond(HttpStatusCode.OK, body)
         }
         post {
             val id = call.receive<IdPayload>()
             val done = markAsDone(id.id)
-            if (done)
-                call.respond(HttpStatusCode.OK, id.id)
-            else
-                call.respond(HttpStatusCode.InternalServerError, "Production not marked as done")
+            if (done) call.respond(HttpStatusCode.OK, id.id)
+            else call.respond(HttpStatusCode.InternalServerError, "Production not marked as done")
         }
     }
 }
 
-@Serializable
-data class IdPayload(
-    val id: Int
-)
+@Serializable data class IdPayload(val id: Int)
