@@ -24,7 +24,10 @@ object ProductionCache {
       productionCache[it] = production.filter { p -> p.origin == it }
     }
   }
-  fun setNext(origin: String) = productionQueue.add(origin)
+  fun setNext(origin: String): List<String> {
+    productionQueue.add(origin)
+    return productionQueue
+  }
   fun getNext(): List<ProductionPayload>? =
       runCatching { productionCache[productionQueue.removeFirstOrNull()] }.getOrDefault(null)
   fun getQueue(): List<String> {
@@ -56,6 +59,7 @@ fun Route.production() {
   route("/setNextProduction") {
     post {
       val uid = call.receive<UidPayload>()
+      call.application.environment.log.info(uid.uid)
       setNext(uid.uid)
       call.respond(HttpStatusCode.OK, uid.uid)
     }
