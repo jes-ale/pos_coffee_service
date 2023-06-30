@@ -12,17 +12,14 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 object ProductionCache {
-    private val productionQueue = mutableListOf<ProductionPayload>()
-    fun updateCache(production: List<ProductionPayload>) {
-        val ids = productionQueue.map { it.id }
-        production.forEachIndexed { _, item ->
-            if (!ids.contains(item.id)) // each mrp.production can only be cached 1 time per on/off service or cache flushed
-                productionQueue.add(item)
-        }
+    private val productionQueue = mutableListOf<List<ProductionPayload>>()
+    fun updateCache(production: List<List<ProductionPayload>>) {
+        // TODO: agrupar por order_id
     }
 
-    fun getNext(): ProductionPayload? {
-        return productionQueue.removeFirstOrNull()
+    fun getNext(): List<ProductionPayload>? {
+        //TODO: get next by orderid
+        throw Exception("not yet implemented")
     }
 }
 
@@ -32,7 +29,8 @@ fun Route.production() {
             val productionConfirmed = queryProduction()
             if (productionConfirmed.isEmpty())
                 call.respondText("Production orders empty", status = HttpStatusCode.OK)
-            updateCache(productionConfirmed)
+            val sortedProduction = listOf(productionConfirmed)
+            updateCache(sortedProduction)
             val body = getNext()
             if (body == null)
                 call.respondText("Production orders empty", status = HttpStatusCode.OK)
