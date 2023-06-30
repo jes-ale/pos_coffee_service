@@ -134,7 +134,7 @@ object RpcApi {
                     id = production.id,
                     order_id = comandaId,
                     display_name = production.display_name,
-                    origin = production.origin ?: "",
+                    origin = production.origin ?: "no-display",
                     priority = production.priority,
                     state = production.state,
                     product = ProductPayload(
