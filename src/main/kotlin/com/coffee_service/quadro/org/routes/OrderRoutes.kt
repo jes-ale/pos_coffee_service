@@ -27,7 +27,7 @@ fun Route.order() {
     get {
       val order = getNext()
       if (order != null) call.respond<List<Order>>(order)
-      else call.respond(HttpStatusCode.OK, "Orders empty")
+      else call.respond(HttpStatusCode.InternalServerError, "Orders empty")
     }
     post {
       val order = call.receive<List<Order>>()
