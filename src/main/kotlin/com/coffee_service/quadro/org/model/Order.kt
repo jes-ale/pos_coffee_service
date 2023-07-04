@@ -5,6 +5,11 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Order(
     val uid: String,
+    val order_lines: List<OrderLine>
+)
+
+@Serializable
+data class OrderLine(
     val product_id: Int,
     val options: ProductOptions,
     val components: List<Components>

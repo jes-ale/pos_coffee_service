@@ -11,13 +11,13 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 object OrderCache {
-  private val orderQueue = mutableListOf<List<Order>>()
-  fun getNext(): List<Order>? {
+  private val orderQueue = mutableListOf<Order>()
+  fun getNext(): Order? {
     return orderQueue.removeFirstOrNull()
   }
 
-  fun addLast(order: List<Order>): Boolean {
-    setNext("POS-Orden ${order[0].uid}")
+  fun addLast(order: Order)Boolean {
+    setNext("POS-Orden ${order.uid}")
     return orderQueue.add(order)
   }
 }
@@ -26,7 +26,7 @@ fun Route.order() {
   route("/order") {
     get {
       val order = getNext()
-      if (order != null) call.respond<List<Order>>(order)
+      if (order != null) call.respond(order)
       else call.respond(HttpStatusCode.InternalServerError, "Orders empty")
     }
     post {
