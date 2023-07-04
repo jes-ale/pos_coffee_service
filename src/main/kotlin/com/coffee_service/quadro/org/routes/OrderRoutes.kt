@@ -17,7 +17,7 @@ object OrderCache {
   }
 
   fun addLast(order: List<Order>): Boolean {
-    setNext(order[0].uid)
+    setNext("POS-Orden ${order[0].uid}")
     return orderQueue.add(order)
   }
 }

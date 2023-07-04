@@ -60,6 +60,8 @@ fun Route.production() {
     post {
       val uid = call.receive<UidPayload>()
       call.application.environment.log.info(uid.uid)
+      // UID reaches here as POS-Orden {uid} so we can just push it unlike /order endpoint in
+      // which we need to transform the UID into Origin string
       setNext(uid.uid)
       call.respond(HttpStatusCode.OK, uid.uid)
     }
