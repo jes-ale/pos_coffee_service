@@ -16,8 +16,8 @@ object OrderCache {
     return orderQueue.removeFirstOrNull()
   }
 
-  fun addLast(order: Order)Boolean {
-    setNext("POS-Orden ${order.uid}")
+  fun addLast(order: Order): Boolean {
+    setNext("POS-${order.name}")
     return orderQueue.add(order)
   }
 }
@@ -30,7 +30,7 @@ fun Route.order() {
       else call.respond(HttpStatusCode.InternalServerError, "Orders empty")
     }
     post {
-      val order = call.receive<List<Order>>()
+      val order = call.receive<Order>()
       if (addLast(order)) call.respond(HttpStatusCode.OK, "PoS order stored")
       else call.respond(HttpStatusCode.InternalServerError, "PoS order not stored")
     }

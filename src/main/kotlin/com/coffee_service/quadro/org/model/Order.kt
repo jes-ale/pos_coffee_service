@@ -2,7 +2,7 @@ package com.coffee_service.quadro.org.model
 
 import kotlinx.serialization.Serializable
 
-@Serializable data class Order(val uid: String, val orderlines: List<OrderLine>)
+@Serializable data class Order(val name: String, val uid: String, val orderlines: List<OrderLine>)
 
 @Serializable
 data class OrderLine(
