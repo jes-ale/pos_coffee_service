@@ -31,6 +31,7 @@ fun Route.order() {
     }
     post {
       val order = call.receive<Order>()
+      call.application.environment.log.info("$order")
       if (addLast(order)) call.respond(HttpStatusCode.OK, "PoS order stored")
       else call.respond(HttpStatusCode.InternalServerError, "PoS order not stored")
     }
