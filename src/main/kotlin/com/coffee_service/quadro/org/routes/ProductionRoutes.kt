@@ -20,6 +20,7 @@ object ProductionCache {
   private val productionCache = mutableMapOf<String, List<ProductionPayload>>()
   private val productionQueue = mutableListOf<String>()
   fun updateCache(production: List<ProductionPayload>) {
+    productionCache.clear()
     production.map { it.origin }.stream().distinct().collect(Collectors.toList()).forEach {
       productionCache[it] = production.filter { p -> p.origin == it }
     }
