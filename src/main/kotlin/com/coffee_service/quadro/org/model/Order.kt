@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class OrderLine(
+    val production_id: Int?,
     val product_id: Int,
     val options: ProductOptions,
     val extra_components: List<Components>
