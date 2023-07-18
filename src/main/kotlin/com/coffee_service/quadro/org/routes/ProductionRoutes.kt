@@ -56,13 +56,6 @@ fun Route.production() {
       if (done) call.respond(HttpStatusCode.OK, id.id)
       else call.respond(HttpStatusCode.InternalServerError, "Production not marked as done")
     }
-    delete {
-      val production = queryProduction()
-      if (production.isEmpty()) call.respond(HttpStatusCode.OK, "Production orders empty")
-      updateCache(production)
-      if (addLast(order)) call.respond(HttpStatusCode.OK, "PoS order stored")
-      else call.respond(HttpStatusCode.InternalServerError, "PoS order not stored")
-    }
   }
   route("/setNextProduction") {
     post {
