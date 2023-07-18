@@ -12,7 +12,7 @@ data class OrderLine(
     val extra_components: List<Components>
 )
 
-@Serializable data class Components(val product_id: Int, val qty: Int)
+@Serializable data class Components(val id: Int, val qty: Int)
 
 @Serializable
 data class ProductOptions(
