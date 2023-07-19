@@ -1,5 +1,5 @@
 #!/bin/sh
-# ensure jvm installed 
+# ensure jvm installed
 REQUIRED_PKG="openjdk-11-jdk"
 PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $REQUIRED_PKG|grep "install ok installed")
 echo Checking for $REQUIRED_PKG: $PKG_OK
@@ -14,5 +14,5 @@ fi
 # run generated !bin/sh (runs the JVM executable)
 cd build/install/com.coffee_service.quadro.org.manufacture_service/bin
 chmod +x com.coffee_service.quadro.org.manufacture_service
-./com.coffee_service.quadro.org.manufacture_service
+./com.coffee_service.quadro.org.manufacture_service &
 
