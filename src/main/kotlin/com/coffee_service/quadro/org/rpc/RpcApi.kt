@@ -129,7 +129,7 @@ object RpcApi {
             model = "mrp.production",
             kw = "search_read",
             domain = domain.toMap(),
-            params = listOf(listOf(listOf("state", "=", "confirmed"))),
+            params = listOf(listOf(listOf("state", "=", "progress"))),
         )
     val body = mutableListOf<ProductionPayload>()
     for (production in payload) {
