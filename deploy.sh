@@ -14,5 +14,8 @@ fi
 # run generated !bin/sh (runs the JVM executable)
 cd build/install/com.coffee_service.quadro.org.manufacture_service/bin
 chmod +x com.coffee_service.quadro.org.manufacture_service
+if [ $1 = "dev" ]; then
+./com.coffee_service.quadro.org.manufacture_service
+fi
+if [ $1 = "prod" ]; then
 ./com.coffee_service.quadro.org.manufacture_service &
-

@@ -26,12 +26,17 @@ fun Route.order() {
   route("/order") {
     get {
       val order = getNext()
+      call.application.environment.log.info("======")
+      call.application.environment.log.info("$order")
+      call.application.environment.log.info("======")
       if (order != null) call.respond(order)
       else call.respond(HttpStatusCode.InternalServerError, "Orders empty")
     }
     post {
       val order = call.receive<Order>()
+      call.application.environment.log.info("======")
       call.application.environment.log.info("$order")
+      call.application.environment.log.info("======")
       if (addLast(order)) call.respond(HttpStatusCode.OK, "PoS order stored")
       else call.respond(HttpStatusCode.InternalServerError, "PoS order not stored")
     }
