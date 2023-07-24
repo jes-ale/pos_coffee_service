@@ -20,6 +20,7 @@ object ProductionCache {
   private val productionCache = mutableMapOf<String, List<ProductionPayload>>()
   private val productionQueue = mutableListOf<String>()
   fun updateCache(production: List<ProductionPayload>) {
+    //TODO: only clear when size == limit
     productionCache.clear()
     production.map { it.origin }.stream().distinct().collect(Collectors.toList()).forEach {
       productionCache[it] = production.filter { p -> p.origin == it }
@@ -43,12 +44,15 @@ fun Route.production() {
   route("/production") {
     get {
       val production = queryProduction()
-      if (production.isEmpty()) call.respond(HttpStatusCode.OK, "Production orders empty")
       call.application.environment.log.info("=======")
       call.application.environment.log.info(production.toString())
+      call.application.environment.log.info("=======")
+      if (production.isEmpty()) call.respond(HttpStatusCode.OK, "Production orders empty")
       updateCache(production)
       val body = getNext()
+      call.application.environment.log.info("=======")
       call.application.environment.log.info(body.toString())
+      call.application.environment.log.info("=======")
       if (body == null) call.respond(HttpStatusCode.OK, "Production orders empty")
       else call.respond(HttpStatusCode.OK, body)
     }
@@ -62,9 +66,9 @@ fun Route.production() {
   route("/setNextProduction") {
     post {
       val uid = call.receive<UidPayload>()
+      call.application.environment.log.info("=======")
       call.application.environment.log.info(uid.uid)
-      // UID reaches here as POS-Orden {uid} so we can just push it unlike /order endpoint in
-      // which we need to transform the UID into Origin string
+      call.application.environment.log.info("=======")
       setNext(uid.uid)
       call.respond(HttpStatusCode.OK, uid.uid)
     }

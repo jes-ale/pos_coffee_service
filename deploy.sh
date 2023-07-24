@@ -19,3 +19,4 @@ if [ $1 = "dev" ]; then
 fi
 if [ $1 = "prod" ]; then
 ./com.coffee_service.quadro.org.manufacture_service &
+fi
