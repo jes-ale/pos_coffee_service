@@ -20,6 +20,7 @@ object ProductionCache {
   private val productionCache = mutableMapOf<String, List<ProductionPayload>>()
   private val productionQueue = mutableListOf<String>()
   fun updateCache(production: List<ProductionPayload>) {
+    productionCache.clear()
     // TODO: only clear when size == limit
     production.map { it.origin }.stream().distinct().collect(Collectors.toList()).forEach {
       productionCache[it] = production.filter { p -> p.origin == it }
@@ -43,16 +44,10 @@ fun Route.production() {
   route("/production") {
     get {
       val production = queryProduction()
-      call.application.environment.log.info("=======")
-      call.application.environment.log.info("production: $production")
-      call.application.environment.log.info("=======")
       if (production.isEmpty()) call.respond(HttpStatusCode.OK, "Production orders empty")
       else {
         updateCache(production)
         val body = getNext()
-        call.application.environment.log.info("=======")
-        call.application.environment.log.info("body: $body")
-        call.application.environment.log.info("=======")
         if (body == null) call.respond(HttpStatusCode.OK, "Production orders empty")
         else call.respond(HttpStatusCode.OK, body)
       }
@@ -73,20 +68,14 @@ fun Route.production() {
   }
   route("/getProductionQueue") {
     get {
-      call.application.environment.log.info("+++++")
       val queue = getQueue()
-      call.application.environment.log.info("queue: $queue")
       call.respond(HttpStatusCode.OK, queue)
-      call.application.environment.log.info("+++++")
     }
   }
   route("/getProductionCache") {
     get {
-      call.application.environment.log.info("+++++")
       val cache = getCache()
-      call.application.environment.log.info("cache: $cache")
       call.respond(HttpStatusCode.OK, cache)
-      call.application.environment.log.info("+++++")
     }
   }
 }
