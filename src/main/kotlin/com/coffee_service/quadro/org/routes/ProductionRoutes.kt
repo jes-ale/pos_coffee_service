@@ -41,16 +41,9 @@ object ProductionCache {
 fun Route.production() {
   route("/production") {
     get {
-      val production = queryProduction()
-      if (production.isEmpty()) {
-        updateCache(production)
-        call.respond(HttpStatusCode.OK, "Production orders empty")
-      } else {
-        updateCache(production)
-        val body = getNext()
-        if (body == null) call.respond(HttpStatusCode.OK, "Production orders empty")
-        else call.respond(HttpStatusCode.OK, body)
-      }
+      val body = getNext()
+      if (body == null) call.respond(HttpStatusCode.OK, "Production orders empty")
+      else call.respond(HttpStatusCode.OK, body)
     }
     post {
       val id = call.receive<IdPayload>()
@@ -66,14 +59,10 @@ fun Route.production() {
       call.respond(HttpStatusCode.OK, uid.uid)
     }
   }
-  // route("/getProductionQueue") {
-  //   get {
-  //     val queue = getQueue()
-  //     call.respond(HttpStatusCode.OK, queue)
-  //   }
-  // }
   route("/getProductionCache") {
     get {
+      val production = queryProduction()
+      updateCache(production)
       val cache = getCache()
       call.application.environment.log.info("$cache")
       call.respond(HttpStatusCode.OK, cache)
