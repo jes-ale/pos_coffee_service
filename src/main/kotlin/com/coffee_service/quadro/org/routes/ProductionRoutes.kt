@@ -43,8 +43,8 @@ fun Route.production() {
     get {
       val production = queryProduction()
       if (production.isEmpty()) {
-        call.respond(HttpStatusCode.OK, "Production orders empty")
         updateCache(production)
+        call.respond(HttpStatusCode.OK, "Production orders empty")
       } else {
         updateCache(production)
         val body = getNext()
