@@ -3,7 +3,6 @@ package com.coffee_service.quadro.org.routes
 import com.coffee_service.quadro.org.model.ProductionPayload
 import com.coffee_service.quadro.org.routes.ProductionCache.getCache
 import com.coffee_service.quadro.org.routes.ProductionCache.getNext
-import com.coffee_service.quadro.org.routes.ProductionCache.getQueue
 import com.coffee_service.quadro.org.routes.ProductionCache.setNext
 import com.coffee_service.quadro.org.routes.ProductionCache.updateCache
 import com.coffee_service.quadro.org.rpc.RpcApi.markAsDone
@@ -21,7 +20,6 @@ object ProductionCache {
   private val productionQueue = mutableListOf<String>()
   fun updateCache(production: List<ProductionPayload>) {
     productionCache.clear()
-    // TODO: only clear when size == limit
     production.map { it.origin }.stream().distinct().collect(Collectors.toList()).forEach {
       productionCache[it] = production.filter { p -> p.origin == it }
     }
@@ -44,8 +42,10 @@ fun Route.production() {
   route("/production") {
     get {
       val production = queryProduction()
-      if (production.isEmpty()) call.respond(HttpStatusCode.OK, "Production orders empty")
-      else {
+      if (production.isEmpty()) {
+        call.respond(HttpStatusCode.OK, "Production orders empty")
+        updateCache(production)
+      } else {
         updateCache(production)
         val body = getNext()
         if (body == null) call.respond(HttpStatusCode.OK, "Production orders empty")
@@ -66,15 +66,16 @@ fun Route.production() {
       call.respond(HttpStatusCode.OK, uid.uid)
     }
   }
-  route("/getProductionQueue") {
-    get {
-      val queue = getQueue()
-      call.respond(HttpStatusCode.OK, queue)
-    }
-  }
+  // route("/getProductionQueue") {
+  //   get {
+  //     val queue = getQueue()
+  //     call.respond(HttpStatusCode.OK, queue)
+  //   }
+  // }
   route("/getProductionCache") {
     get {
       val cache = getCache()
+      call.application.environment.log.info("$cache")
       call.respond(HttpStatusCode.OK, cache)
     }
   }
