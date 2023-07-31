@@ -92,16 +92,9 @@ object RpcApi {
         domain = mapOf()
     )
   }
-	fun queryProducts(): List<ProductPayload> {
+  fun queryProducts(): List<ProductPayload> {
     val domain = mutableMapOf<String, Any>()
-    domain["fields"] =
-        listOf(
-            "id",
-						"display_name",
-						"categ_id",
-						"pos_categ_id",
-						"pos_production"
-        )
+    domain["fields"] = listOf("id", "display_name", "categ_id", "pos_categ_id", "pos_production")
     domain["limit"] = 100
     val payload =
         kwQuery<Product>(
@@ -111,20 +104,13 @@ object RpcApi {
             domain = domain.toMap(),
             params = listOf(listOf(listOf("available_in_pos", "=", "True"))),
         )
-		val body = mutableListOf<ProductPayload>()
-		for(prod in payload){
-			val categ = Json.decodeFromJsonElement<String>(prod.categ_id[1])
-			val pos_categ = Json.decodeFromJsonElement<String>(prod.pos_categ_id[1])
-			body.add(
-				ProductPayload(
-					prod.id,
-					prod.display_name,
-					categ,
-					pos_categ
-				)
-			)
-		}
-		return body
+    val body = mutableListOf<ProductPayload>()
+    for (prod in payload) {
+      val categ = Json.decodeFromJsonElement<String>(prod.categ_id[1])
+      val pos_categ = Json.decodeFromJsonElement<String>(prod.pos_categ_id[1])
+      body.add(ProductPayload(prod.id, prod.display_name, categ, pos_categ))
+    }
+    return body
   }
   private fun queryStockMove(ids: List<Int>): List<StockMove> {
     val domain = mutableMapOf<String, Any>()
@@ -173,6 +159,7 @@ object RpcApi {
       for (comp in rawStockMove) {
         components.add(
             ComponentPayload(
+                Json.decodeFromJsonElement<Int>(comp.product_id[0]),
                 display_name = Json.decodeFromJsonElement<String>(comp.product_id[1]),
                 qty = comp.product_uom_qty
             )
@@ -186,7 +173,7 @@ object RpcApi {
               priority = production.priority,
               state = production.state,
               product =
-                  ProductPayload(
+                  ProductPaiload(
                       id = productId,
                       display_name = productDisplayName,
                   ),
