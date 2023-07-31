@@ -92,7 +92,7 @@ object RpcApi {
         domain = mapOf()
     )
   }
-  private fun queryBoms(): List<Bom> {
+  fun queryBoms(): List<Bom> {
     return kwQuery<Bom>(
         pMethodName = "execute_kw",
         model = "mrp.production",
