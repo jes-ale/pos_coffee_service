@@ -84,16 +84,23 @@ object RpcApi {
   }
 
   fun markAsDone(id: Int): Boolean {
-    val domain = mutableMapOf<String, Any>()
     return kwCall(
         pMethodName = "execute_kw",
         model = "mrp.production",
         kw = "mark_as_done",
         params = listOf(id, id),
-        domain = domain.toMap()
+        domain = mapOf()
     )
   }
-
+  private fun queryBoms(): List<Bom> {
+    return kwQuery<Bom>(
+        pMethodName = "execute_kw",
+        model = "mrp.production",
+        kw = "queryBomreads",
+        domain = mapOf(),
+        params = listOf()
+    )
+  }
   private fun queryStockMove(ids: List<Int>): List<StockMove> {
     val domain = mutableMapOf<String, Any>()
     domain["fields"] = listOf("id", "product_id", "product_uom_qty")
@@ -129,7 +136,7 @@ object RpcApi {
             model = "mrp.production",
             kw = "search_read",
             domain = domain.toMap(),
-            params = listOf(listOf(listOf("state","=","progress"))),
+            params = listOf(listOf(listOf("state", "=", "progress"))),
         )
     val body = mutableListOf<ProductionPayload>()
     for (production in payload) {
