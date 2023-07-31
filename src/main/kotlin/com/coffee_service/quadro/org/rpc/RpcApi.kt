@@ -92,11 +92,20 @@ object RpcApi {
         domain = mapOf()
     )
   }
-  fun queryBoms(): List<Bom> {
+  private fun queryBoms(): List<Bom> {
     return kwQuery<Bom>(
         pMethodName = "execute_kw",
         model = "mrp.production",
-        kw = "queryBomreads",
+        kw = "queryBoms",
+        domain = mapOf(),
+        params = listOf()
+    )
+  }
+  private fun queryBomLines(): List<BomLine> {
+    return kwQuery<BomLine>(
+        pMethodName = "execute_kw",
+        model = "mrp.production",
+        kw = "queryBomLines",
         domain = mapOf(),
         params = listOf()
     )
@@ -170,6 +179,32 @@ object RpcApi {
       )
     }
     return body
+  }
+  fun queryBom(): List<BomPayload> {
+    val rawBoms = queryBoms()
+    val rawBomLines = queryBomLines()
+    val body = mutableListOf<BomPayload>()
+    for (bom in rawBoms) {
+      val productId = Json.decodeFromJsonElement<Int>(bom.product_id[0])
+      val bomLines = mutableListOf<BomLinePayload>()
+      for (line in rawBomLines) {
+        val bomId = Json.decodeFromJsonElement<Int>(line.bom_id[0])
+        val componentId = Json.decodeFromJsonElement<Int>(line.product_id[0])
+        val uom = Json.decodeFromJsonElement<String>(line.product_id[1])
+        if (bomId == bom.id)
+            bomLines.add(
+                BomLinePayload(
+                    line.id,
+                    componentId,
+                    line.product_qty,
+                    uom,
+                    line.bom_product_template_attribute_value_ids
+                )
+            )
+      }
+      body.add(BomPayload(bom.id, bomLines, productId))
+    }
+		return body
   }
 
   /** https://github.com/Kotlin/kotlinx.serialization/issues/746#issuecomment-737000705 */
