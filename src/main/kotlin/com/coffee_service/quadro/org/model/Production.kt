@@ -10,11 +10,11 @@ data class ProductionPayload(
     val origin: String,
     val priority: String,
     val state: String,
-    val product: ProductPayload,
+    val product: ProductPaiload,
     val component: List<ComponentPayload>
 )
 
-@Serializable data class ProductPayload(val id: Int, val display_name: String)
+@Serializable data class ProductPaiload(val id: Int, val display_name: String)
 
 @Serializable data class ComponentPayload(val id: Int, val display_name: String, val qty: Double)
 
