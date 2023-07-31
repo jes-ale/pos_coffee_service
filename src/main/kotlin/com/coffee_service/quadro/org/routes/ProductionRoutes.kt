@@ -7,6 +7,7 @@ import com.coffee_service.quadro.org.routes.ProductionCache.setNext
 import com.coffee_service.quadro.org.routes.ProductionCache.updateCache
 import com.coffee_service.quadro.org.rpc.RpcApi.markAsDone
 import com.coffee_service.quadro.org.rpc.RpcApi.queryProduction
+import com.coffee_service.quadro.org.rpc.RpcApi.queryProducts
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -68,10 +69,10 @@ fun Route.production() {
       call.respond(HttpStatusCode.OK, cache)
     }
   }
-route("/products") {
+  route("/products") {
     get {
-			val prods = queryProducts()
-      call.respond(HttpStatusCode.OK, cache)
+      val prods = queryProducts()
+      call.respond(HttpStatusCode.OK, prods)
     }
   }
 }
