@@ -204,7 +204,7 @@ object RpcApi {
       }
       body.add(BomPayload(bom.id, bomLines, productId))
     }
-		return body
+    return body
   }
 
   /** https://github.com/Kotlin/kotlinx.serialization/issues/746#issuecomment-737000705 */
