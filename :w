@@ -92,7 +92,7 @@ object RpcApi {
         domain = mapOf()
     )
   }
-	fun queryProducts(): List<ProductPayload> {
+	fun queryProducts(): List<Product> {
     val domain = mutableMapOf<String, Any>()
     domain["fields"] =
         listOf(
@@ -115,16 +115,7 @@ object RpcApi {
 		for(prod in payload){
 			val categ = Json.decodeFromJsonElement<String>(production.categ_id[1])
 			val pos_categ = Json.decodeFromJsonElement<String>(production.pos_categ_id[1])
-			body.add(
-				ProductPayload(
-					prod.id,
-					prod.display_name,
-					categ,
-					pos_categ
-				)
-			)
-		}
-		return body
+			}
   }
   private fun queryBoms(): List<Bom> {
     return kwQuery<Bom>(

@@ -68,6 +68,15 @@ fun Route.production() {
       call.respond(HttpStatusCode.OK, cache)
     }
   }
+route("/category") {
+    get {
+      val production = queryProduction()
+      updateCache(production)
+      val cache = getCache()
+      call.application.environment.log.info("$cache")
+      call.respond(HttpStatusCode.OK, cache)
+    }
+  }
 }
 
 @Serializable data class IdPayload(val id: Int)

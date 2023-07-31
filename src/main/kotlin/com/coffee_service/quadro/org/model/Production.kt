@@ -16,7 +16,7 @@ data class ProductionPayload(
 
 @Serializable data class ProductPayload(val id: Int, val display_name: String)
 
-@Serializable data class ComponentPayload(val display_name: String, val qty: Double)
+@Serializable data class ComponentPayload(val id: Int, val display_name: String, val qty: Double)
 
 @Serializable
 data class Production(
