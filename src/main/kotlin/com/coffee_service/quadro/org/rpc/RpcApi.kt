@@ -185,8 +185,8 @@ object RpcApi {
     val rawBomLines = queryBomLines()
     val body = mutableListOf<BomPayload>()
     for (bom in rawBoms) {
-      val productId = Json.decodeFromJsonElement<Int>(bom.product_id[0])
       val bomLines = mutableListOf<BomLinePayload>()
+      val productId = Json.decodeFromJsonElement<Int>(bom.product_id[0])
       for (line in rawBomLines) {
         val bomId = Json.decodeFromJsonElement<Int>(line.bom_id[0])
         val componentId = Json.decodeFromJsonElement<Int>(line.product_id[0])
