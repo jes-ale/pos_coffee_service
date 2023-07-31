@@ -111,10 +111,10 @@ object RpcApi {
             domain = domain.toMap(),
             params = listOf(listOf(listOf("available_in_pos", "=", "True"))),
         )
-		val body = mutableListOf()
+		val body = mutableListOf<ProductPayload>()
 		for(prod in payload){
-			val categ = Json.decodeFromJsonElement<String>(production.categ_id[1])
-			val pos_categ = Json.decodeFromJsonElement<String>(production.pos_categ_id[1])
+			val categ = Json.decodeFromJsonElement<String>(prod.categ_id[1])
+			val pos_categ = Json.decodeFromJsonElement<String>(prod.pos_categ_id[1])
 			body.add(
 				ProductPayload(
 					prod.id,
@@ -125,24 +125,6 @@ object RpcApi {
 			)
 		}
 		return body
-  }
-  private fun queryBoms(): List<Bom> {
-    return kwQuery<Bom>(
-        pMethodName = "execute_kw",
-        model = "mrp.production",
-        kw = "queryBoms",
-        domain = mapOf(),
-        params = listOf()
-    )
-  }
-  private fun queryBomLines(): List<BomLine> {
-    return kwQuery<BomLine>(
-        pMethodName = "execute_kw",
-        model = "mrp.production",
-        kw = "queryBomLines",
-        domain = mapOf(),
-        params = listOf()
-    )
   }
   private fun queryStockMove(ids: List<Int>): List<StockMove> {
     val domain = mutableMapOf<String, Any>()
@@ -211,32 +193,6 @@ object RpcApi {
               component = components,
           )
       )
-    }
-    return body
-  }
-  private fun loadedBoms(): List<BomPayload> {
-    val rawBoms = queryBoms()
-    val rawBomLines = queryBomLines()
-    val body = mutableListOf<BomPayload>()
-    for (bom in rawBoms) {
-      val bomLines = mutableListOf<BomLinePayload>()
-      val productId = Json.decodeFromJsonElement<Int>(bom.product_id[0])
-      for (line in rawBomLines) {
-        val bomId = Json.decodeFromJsonElement<Int>(line.bom_id[0])
-        val componentId = Json.decodeFromJsonElement<Int>(line.product_id[0])
-        val uom = Json.decodeFromJsonElement<String>(line.product_id[1])
-        if (bomId == bom.id)
-            bomLines.add(
-                BomLinePayload(
-                    line.id,
-                    componentId,
-                    line.product_qty,
-                    uom,
-                    line.bom_product_template_attribute_value_ids
-                )
-            )
-      }
-      body.add(BomPayload(bom.id, bomLines, productId))
     }
     return body
   }
