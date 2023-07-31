@@ -20,7 +20,7 @@ data class Bom(
     val id: Int,
     val display_name: String,
     val bom_line_ids: List<Int>,
-    val product_id: Int,
+    val product_id: JsonArray,
     val product_qty: Int,
     val product_tmpl_id: Int,
     val product_uom_id: JsonArray
