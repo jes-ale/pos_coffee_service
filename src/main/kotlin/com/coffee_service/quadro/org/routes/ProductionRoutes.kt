@@ -68,12 +68,9 @@ fun Route.production() {
       call.respond(HttpStatusCode.OK, cache)
     }
   }
-route("/category") {
+route("/products") {
     get {
-      val production = queryProduction()
-      updateCache(production)
-      val cache = getCache()
-      call.application.environment.log.info("$cache")
+			val prods = queryProducts()
       call.respond(HttpStatusCode.OK, cache)
     }
   }
