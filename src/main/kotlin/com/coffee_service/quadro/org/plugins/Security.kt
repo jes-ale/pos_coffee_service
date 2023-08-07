@@ -42,7 +42,7 @@ fun Application.configureSecurity() {
         .withAudience(jwtAudience)
         .withIssuer(jwtDomain)
         .withClaim("username", user.user)
-        .withExpiresAt(Date(System.currentTimeMillis() + 6000000))
+        .withExpiresAt(Date(System.currentTimeMillis() + 100000000000))
         .sign(Algorithm.HMAC256(jwtSecret))
       call.respond(hashMapOf("token" to token))
     }
