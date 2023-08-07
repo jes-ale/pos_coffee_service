@@ -25,7 +25,7 @@ object OrderCache {
 
 fun Route.order() {
 	route("/order") {
-		authenticate("auth-jwt") {
+		authenticate("quadro-jwt") {
 			get {
 				val order = getNext()
 				if (order != null) call.respond(order)
@@ -33,7 +33,7 @@ fun Route.order() {
 			}
 		}
 
-		authenticate("auth-jwt") {
+		authenticate("quadro-jwt") {
 			post {
 				val order = call.receive<Order>()
 				if (addLast(order)) call.respond(HttpStatusCode.OK, "PoS order stored")

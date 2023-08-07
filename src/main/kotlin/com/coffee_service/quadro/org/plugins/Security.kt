@@ -18,7 +18,7 @@ fun Application.configureSecurity() {
   val jwtRealm = environment.config.property("jwt.realm").getString()
   val jwtSecret = environment.config.property("jwt.secret").getString()
   authentication {
-    jwt("auth-jwt") {
+    jwt("quadro-jwt") {
       realm = jwtRealm ?: "void"
       verifier(
         JWT
