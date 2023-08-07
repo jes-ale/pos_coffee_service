@@ -10,7 +10,6 @@ import io.ktor.server.http.content.*
 fun Application.configureRouting() {
 	routing {
 		staticResources(remotePath = "/static", "/files")
-		this@configureRouting.configureSecurity()
 		healthCheck()
 		production()
 		order()
