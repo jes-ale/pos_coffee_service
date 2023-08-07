@@ -46,14 +46,14 @@ object ProductionCache {
 
 fun Route.production() {
 	route("/production") {
-		authenticate("auth-jwt") {
+		authenticate("quadro-jwt") {
 			get {
 				val body = getNext()
 				if (body == null) call.respond(HttpStatusCode.OK, "Production orders empty")
 				else call.respond(HttpStatusCode.OK, body)
 			}
 		}
-		authenticate("auth-jwt") {
+		authenticate("quadro-jwt") {
 			post {
 				val id = call.receive<IdPayload>()
 				val done = markAsDone(id.id)
@@ -63,7 +63,7 @@ fun Route.production() {
 		}
 	}
 	route("/setNextProduction") {
-		authenticate("auth-jwt") {
+		authenticate("quadro-jwt") {
 			post {
 				val uid = call.receive<UidPayload>()
 				setNext(uid.uid)
@@ -72,7 +72,7 @@ fun Route.production() {
 		}
 	}
 	route("/getProductionQueue") {
-		authenticate("auth-jwt") {
+		authenticate("quadro-jwt") {
 			get {
 				val production = queryProduction()
 				updateCache(production)
@@ -83,11 +83,11 @@ fun Route.production() {
 		}
 	}
 	route("/getProductionCache") {
-		authenticate("auth-jwt") {
+		authenticate("quadro-jwt") {
 			get { call.respond(HttpStatusCode.OK, getCache()) }
 		}
 	}
-	authenticate("auth-jwt") {
+	authenticate("quadro-jwt") {
 		route("/products") {
 			get {
 				val prods = queryProducts()
