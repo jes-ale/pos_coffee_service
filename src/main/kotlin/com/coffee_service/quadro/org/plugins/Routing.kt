@@ -8,10 +8,11 @@ import io.ktor.server.application.*
 import io.ktor.server.http.content.*
 
 fun Application.configureRouting() {
-    routing {
-        staticResources(remotePath = "/static","/files")
-        healthCheck()
-        production()
-        order()
-    }
+	routing {
+		staticResources(remotePath = "/static", "/files")
+		this@configureRouting.configureSecurity()
+		healthCheck()
+		production()
+		order()
+	}
 }
