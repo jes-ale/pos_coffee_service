@@ -10,6 +10,7 @@ import com.coffee_service.quadro.org.rpc.RpcApi.queryProduction
 import com.coffee_service.quadro.org.rpc.RpcApi.queryProducts
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -17,66 +18,87 @@ import java.util.stream.Collectors
 import kotlinx.serialization.Serializable
 
 object ProductionCache {
-  private val productionCache = mutableMapOf<String, List<ProductionPayload>>()
-  private val productionQueue = mutableListOf<String>()
-  fun updateCache(production: List<ProductionPayload>) {
-    productionCache.clear()
-    production.map { it.origin }.stream().distinct().collect(Collectors.toList()).forEach {
-      productionCache[it] = production.filter { p -> p.origin == it }
-    }
-  }
-  fun setNext(origin: String): List<String> {
-    productionQueue.add(origin)
-    return productionQueue
-  }
-  fun getNext(): List<ProductionPayload>? =
-      runCatching { productionCache[productionQueue.removeFirstOrNull()] }.getOrDefault(null)
-  fun getQueue(): List<String> {
-    return productionQueue
-  }
-  fun getCache(): Map<String, List<ProductionPayload>> {
-    return productionCache
-  }
+	private val productionCache = mutableMapOf<String, List<ProductionPayload>>()
+	private val productionQueue = mutableListOf<String>()
+	fun updateCache(production: List<ProductionPayload>) {
+		productionCache.clear()
+		production.map { it.origin }.stream().distinct().collect(Collectors.toList()).forEach {
+			productionCache[it] = production.filter { p -> p.origin == it }
+		}
+	}
+
+	fun setNext(origin: String): List<String> {
+		productionQueue.add(origin)
+		return productionQueue
+	}
+
+	fun getNext(): List<ProductionPayload>? =
+		runCatching { productionCache[productionQueue.removeFirstOrNull()] }.getOrDefault(null)
+
+	fun getQueue(): List<String> {
+		return productionQueue
+	}
+
+	fun getCache(): Map<String, List<ProductionPayload>> {
+		return productionCache
+	}
 }
 
 fun Route.production() {
-  route("/production") {
-    get {
-      val body = getNext()
-      if (body == null) call.respond(HttpStatusCode.OK, "Production orders empty")
-      else call.respond(HttpStatusCode.OK, body)
-    }
-    post {
-      val id = call.receive<IdPayload>()
-      val done = markAsDone(id.id)
-      if (done) call.respond(HttpStatusCode.OK, id.id)
-      else call.respond(HttpStatusCode.InternalServerError, "Production not marked as done")
-    }
-  }
-  route("/setNextProduction") {
-    post {
-      val uid = call.receive<UidPayload>()
-      setNext(uid.uid)
-      call.respond(HttpStatusCode.OK, uid.uid)
-    }
-  }
-  route("/getProductionCache") {
-    get {
-      val production = queryProduction()
-      updateCache(production)
-      val cache = getCache()
-      call.application.environment.log.info("$cache")
-      call.respond(HttpStatusCode.OK, cache)
-    }
-  }
-  route("/products") {
-    get {
-      val prods = queryProducts()
-      call.respond(HttpStatusCode.OK, prods)
-    }
-  }
+	route("/production") {
+		authenticate("auth-jwt") {
+			get {
+				val body = getNext()
+				if (body == null) call.respond(HttpStatusCode.OK, "Production orders empty")
+				else call.respond(HttpStatusCode.OK, body)
+			}
+		}
+		authenticate("auth-jwt") {
+			post {
+				val id = call.receive<IdPayload>()
+				val done = markAsDone(id.id)
+				if (done) call.respond(HttpStatusCode.OK, id.id)
+				else call.respond(HttpStatusCode.InternalServerError, "Production not marked as done")
+			}
+		}
+	}
+	route("/setNextProduction") {
+		authenticate("auth-jwt") {
+			post {
+				val uid = call.receive<UidPayload>()
+				setNext(uid.uid)
+				call.respond(HttpStatusCode.OK, uid.uid)
+			}
+		}
+	}
+	route("/getProductionQueue") {
+		authenticate("auth-jwt") {
+			get {
+				val production = queryProduction()
+				updateCache(production)
+				val cache = getCache()
+				call.application.environment.log.info("$cache")
+				call.respond(HttpStatusCode.OK, cache)
+			}
+		}
+	}
+	route("/getProductionCache") {
+		authenticate("auth-jwt") {
+			get { call.respond(HttpStatusCode.OK, getCache()) }
+		}
+	}
+	authenticate("auth-jwt") {
+		route("/products") {
+			get {
+				val prods = queryProducts()
+				call.respond(HttpStatusCode.OK, prods)
+			}
+		}
+	}
 }
 
-@Serializable data class IdPayload(val id: Int)
+@Serializable
+data class IdPayload(val id: Int)
 
-@Serializable data class UidPayload(val uid: String)
+@Serializable
+data class UidPayload(val uid: String)
