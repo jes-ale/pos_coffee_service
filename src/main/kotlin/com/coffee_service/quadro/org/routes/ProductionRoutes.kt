@@ -10,6 +10,7 @@ import com.coffee_service.quadro.org.rpc.RpcApi.markAsDone
 import com.coffee_service.quadro.org.rpc.RpcApi.queryProduction
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -25,15 +26,19 @@ object ProductionCache {
       productionCache[it] = production.filter { p -> p.origin == it }
     }
   }
+
   fun setNext(origin: String): List<String> {
     productionQueue.add(origin)
     return productionQueue
   }
+
   fun getNext(): List<ProductionPayload>? =
-      runCatching { productionCache[productionQueue.removeFirstOrNull()] }.getOrDefault(null)
+    runCatching { productionCache[productionQueue.removeFirstOrNull()] }.getOrDefault(null)
+
   fun getQueue(): List<String> {
     return productionQueue
   }
+
   fun getCache(): Map<String, List<ProductionPayload>> {
     return productionCache
   }
@@ -41,36 +46,52 @@ object ProductionCache {
 
 fun Route.production() {
   route("/production") {
-    get {
-      val production = queryProduction()
-      if (production.isEmpty()) call.respond(HttpStatusCode.OK, "Production orders empty")
-      updateCache(production)
-      val body = getNext()
-      call.application.environment.log.info(body.toString())
-      if (body == null) call.respond(HttpStatusCode.OK, "Production orders empty")
-      else call.respond(HttpStatusCode.OK, body)
+    authenticate("auth-jwt") {
+      get {
+        val production = queryProduction()
+        if (production.isEmpty()) call.respond(HttpStatusCode.OK, "Production orders empty")
+        updateCache(production)
+        val body = getNext()
+        call.application.environment.log.info(body.toString())
+        if (body == null) call.respond(HttpStatusCode.OK, "Production orders empty")
+        else call.respond(HttpStatusCode.OK, body)
+      }
     }
-    post {
-      val id = call.receive<IdPayload>()
-      val done = markAsDone(id.id)
-      if (done) call.respond(HttpStatusCode.OK, id.id)
-      else call.respond(HttpStatusCode.InternalServerError, "Production not marked as done")
+    authenticate("auth-jwt") {
+      post {
+        val id = call.receive<IdPayload>()
+        val done = markAsDone(id.id)
+        if (done) call.respond(HttpStatusCode.OK, id.id)
+        else call.respond(HttpStatusCode.InternalServerError, "Production not marked as done")
+      }
     }
   }
   route("/setNextProduction") {
-    post {
-      val uid = call.receive<UidPayload>()
-      call.application.environment.log.info(uid.uid)
-      // UID reaches here as POS-Orden {uid} so we can just push it unlike /order endpoint in
-      // which we need to transform the UID into Origin string
-      setNext(uid.uid)
-      call.respond(HttpStatusCode.OK, uid.uid)
+    authenticate("auth-jwt") {
+      post {
+        val uid = call.receive<UidPayload>()
+        call.application.environment.log.info(uid.uid)
+        // UID reaches here as POS-Orden {uid} so we can just push it unlike /order endpoint in
+        // which we need to transform the UID into Origin string
+        setNext(uid.uid)
+        call.respond(HttpStatusCode.OK, uid.uid)
+      }
     }
   }
-  route("/getProductionQueue") { get { call.respond(HttpStatusCode.OK, getQueue()) } }
-  route("/getProductionCache") { get { call.respond(HttpStatusCode.OK, getCache()) } }
+  route("/getProductionQueue") {
+    authenticate("auth-jwt") {
+      get { call.respond(HttpStatusCode.OK, getQueue()) }
+    }
+  }
+  route("/getProductionCache") {
+    authenticate("auth-jwt") {
+      get { call.respond(HttpStatusCode.OK, getCache()) }
+    }
+  }
 }
 
-@Serializable data class IdPayload(val id: Int)
+@Serializable
+data class IdPayload(val id: Int)
 
-@Serializable data class UidPayload(val uid: String)
+@Serializable
+data class UidPayload(val uid: String)
