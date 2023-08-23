@@ -4,12 +4,12 @@ val logback_version: String by project
 
 plugins {
     kotlin("jvm") version "1.8.22"
-    id("io.ktor.plugin") version "2.3.1"
+    id("io.ktor.plugin") version "2.3.3"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.8.22"
 }
 
 group = "com.coffe_service.quadro.org"
-version = "0.0.1"
+version = "0.1.1"
 application {
     mainClass.set("com.coffee_service.quadro.org.ApplicationKt")
 
@@ -23,7 +23,6 @@ repositories {
         dirs("libs")
     }
 }
-
 dependencies {
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-websockets-jvm:$ktor_version")

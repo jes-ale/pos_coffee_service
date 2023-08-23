@@ -1,6 +1,6 @@
 #!/bin/sh
 # ensure jvm installed
-REQUIRED_PKG="openjdk-11-jdk"
+REQUIRED_PKG="openjdk-8-jdk"
 PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $REQUIRED_PKG|grep "install ok installed")
 echo Checking for $REQUIRED_PKG: $PKG_OK
 if [ "" = "$PKG_OK" ]; then
