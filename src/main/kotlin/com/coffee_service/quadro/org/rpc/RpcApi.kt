@@ -12,24 +12,24 @@ object RpcApi {
 	private val models_config = XmlRpcClientConfigImpl()
 	private var uid = 0
 	private var db = ""
-	private var password = ""
-	fun version(host: String, port: String): Any? {
+	private var api_key = ""
+	fun version(host: String, port: String,api_key: String,database: String): Any? {
 		return runCatching {
+			this.api_key = api_key
+			this.db = database
 			common_config.serverURL = URL("http://$host:$port/xmlrpc/2/common")
 			models_config.serverURL = URL("http://$host:$port/xmlrpc/2/object")
 			client.execute(common_config, "version", listOf<Any>())
 		}.getOrDefault(null)
 	}
 
-	fun login(username: String, password: String, database: String): Int? {
+	fun login(username: String, password: String): Int? {
 		return runCatching {
-			this.db = database
-			this.password = password
 			this.uid =
 				client.execute(
 					common_config,
 					"authenticate",
-					listOf(database, username, password, listOf<Any>())
+					listOf(this.db, username, password, listOf<Any>())
 				) as
 					Int
 			return this.uid
@@ -49,7 +49,7 @@ object RpcApi {
 			listOf(
 				this.db,
 				this.uid,
-				this.password,
+				this.api_key,
 				model,
 				kw,
 				params,
@@ -74,7 +74,7 @@ object RpcApi {
 				listOf(
 					this.db,
 					this.uid,
-					this.password,
+					this.api_key,
 					model,
 					kw,
 					params,

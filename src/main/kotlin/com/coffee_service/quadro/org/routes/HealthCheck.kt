@@ -16,9 +16,10 @@ fun Route.healthCheck() {
       get {
         val version = version(
           call.application.environment.config.property("rpc.host").getString(),
-          call.application.environment.config.property("rpc.port").getString()
-        )
-
+          call.application.environment.config.property("rpc.port").getString(),
+					call.application.environment.config.property("rpc.api_key").getString(),
+					call.application.environment.config.property("rpc.database").getString(),
+					)
         call.respond(HttpStatusCode.OK, "$version")
       }
     }

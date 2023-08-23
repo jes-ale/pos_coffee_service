@@ -43,7 +43,9 @@ fun Application.configureSecurity() {
 			val user = call.receive<User>()
 			val version = version(
 				call.application.environment.config.property("rpc.host").getString(),
-				call.application.environment.config.property("rpc.port").getString()
+				call.application.environment.config.property("rpc.port").getString(),
+				call.application.environment.config.property("rpc.api_key").getString(),
+				call.application.environment.config.property("rpc.database").getString(),
 			)
 			if (version == null) {
 				call.respond(HttpStatusCode.InternalServerError, "Login error.")
@@ -51,8 +53,7 @@ fun Application.configureSecurity() {
 			}
 			val uid = login(
 				user.user,
-				user.password,
-				call.application.environment.config.property("rpc.database").getString(),
+				user.password
 			)
 			if (uid == null) {
 				call.respond(HttpStatusCode.InternalServerError, "Login error.")
