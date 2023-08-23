@@ -71,7 +71,7 @@ object RpcApi {
     return body.toString().isNotEmpty()
   }
 
-  fun login(username: String, password: String, database: String) {
+  fun login(username: String, password: String, database: String): Int {
     this.db = database
     this.password = password
     this.uid =
@@ -81,6 +81,7 @@ object RpcApi {
             listOf(database, username, password, listOf<Any>())
         ) as
             Int
+		return this.uid
   }
 
   fun markAsDone(id: Int): Boolean {

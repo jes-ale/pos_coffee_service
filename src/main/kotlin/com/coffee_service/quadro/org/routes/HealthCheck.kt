@@ -1,6 +1,8 @@
 package com.coffee_service.quadro.org.routes
 
 import com.coffee_service.quadro.org.rpc.RpcApi
+import com.coffee_service.quadro.org.rpc.RpcApi.login
+import com.coffee_service.quadro.org.rpc.RpcApi.version
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -12,15 +14,11 @@ fun Route.healthCheck() {
   route("/version") {
     authenticate("quadro-jwt") {
       get {
-        val version = RpcApi.version(
+        val version = version(
           call.application.environment.config.property("rpc.host").getString(),
           call.application.environment.config.property("rpc.port").getString()
         )
-        RpcApi.login(
-          call.application.environment.config.property("rpc.username").getString(),
-          call.application.environment.config.property("rpc.password").getString(),
-          call.application.environment.config.property("rpc.database").getString(),
-        )
+
         call.respond(HttpStatusCode.OK, "$version")
       }
     }
