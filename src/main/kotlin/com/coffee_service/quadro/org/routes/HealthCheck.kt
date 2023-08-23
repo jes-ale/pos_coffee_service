@@ -12,7 +12,7 @@ import io.ktor.server.routing.*
 
 fun Route.healthCheck() {
   route("/version") {
-    authenticate("quadro-jwt") {
+    authenticate("auth-jwt") {
       get {
         val version = version(
           call.application.environment.config.property("rpc.host").getString(),
