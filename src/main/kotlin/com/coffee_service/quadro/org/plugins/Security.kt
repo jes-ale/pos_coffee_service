@@ -19,8 +19,8 @@ fun Application.configureSecurity() {
 	val jwtRealm = environment.config.property("jwt.realm").getString()
 	val jwtSecret = environment.config.property("jwt.secret").getString()
 	authentication {
-		jwt("quadro-jwt") {
-			realm = jwtRealm ?: "void"
+		jwt("auth-jwt") {
+			realm = "void"
 			verifier(
 				JWT
 					.require(Algorithm.HMAC256(jwtSecret))
@@ -28,9 +28,13 @@ fun Application.configureSecurity() {
 					.withIssuer(jwtDomain)
 					.build()
 			)
+		}
+		jwt("auth-jwt") {
 			validate { credential ->
 				if (credential.payload.audience.contains(jwtAudience)) JWTPrincipal(credential.payload) else null
 			}
+		}
+		jwt("auth-jwt") {
 			challenge { _, _ ->
 				call.respond(HttpStatusCode.Unauthorized, "Token is not valid or has expired")
 			}
@@ -39,23 +43,22 @@ fun Application.configureSecurity() {
 	routing {
 		post("/login") {
 			val user = call.receive<User>()
-			val success = runCatching {
-				login(
+			try {
+				val uid = login(
 					user.user,
 					user.password,
 					call.application.environment.config.property("rpc.database").getString(),
 				)
-			}
-			if (success.isSuccess) {
 				val token = JWT.create()
 					.withAudience(jwtAudience)
 					.withIssuer(jwtDomain)
 					.withClaim("username", user.user)
+					.withClaim("uid", uid)
 					.withExpiresAt(Date(System.currentTimeMillis() + 100000000000))
 					.sign(Algorithm.HMAC256(jwtSecret))
 				call.respond(hashMapOf("token" to token))
-			} else {
-				call.respond(HttpStatusCode.InternalServerError, "Login failure")
+			} catch (ex: Exception) {
+				call.respond(HttpStatusCode.InternalServerError, ex)
 			}
 		}
 	}
