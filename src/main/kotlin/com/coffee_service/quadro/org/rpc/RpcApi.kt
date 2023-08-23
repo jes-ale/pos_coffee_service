@@ -18,8 +18,22 @@ object RpcApi {
 			common_config.serverURL = URL("http://$host:$port/xmlrpc/2/common")
 			models_config.serverURL = URL("http://$host:$port/xmlrpc/2/object")
 			client.execute(common_config, "version", listOf<Any>())
-		}
-			.getOrNull()
+		}.getOrDefault(null)
+	}
+
+	fun login(username: String, password: String, database: String): Int? {
+		return runCatching {
+			this.db = database
+			this.password = password
+			this.uid =
+				client.execute(
+					common_config,
+					"authenticate",
+					listOf(database, username, password, listOf<Any>())
+				) as
+					Int
+			return this.uid
+		}.getOrDefault(null)
 	}
 
 	private inline fun <reified T> kwQuery(
@@ -71,22 +85,6 @@ object RpcApi {
 		return body.toString().isNotEmpty()
 	}
 
-	fun login(username: String, password: String, database: String): Int {
-		try {
-			this.db = database
-			this.password = password
-			this.uid =
-				client.execute(
-					common_config,
-					"authenticate",
-					listOf(database, username, password, listOf<Any>())
-				) as
-					Int
-			return this.uid
-		} catch (ex: Exception) {
-			throw ex
-		}
-	}
 
 	fun markAsDone(id: Int): Boolean {
 		return kwCall(
