@@ -46,33 +46,28 @@ object ProductionCache {
 
 fun Route.production() {
 	route("/production") {
-		authenticate("auth-jwt") {
 			get {
+				val production = queryProduction()
+				updateCache(production)
 				val body = getNext()
 				if (body == null) call.respond(HttpStatusCode.OK, "Production orders empty")
 				else call.respond(HttpStatusCode.OK, body)
 			}
-		}
-		authenticate("auth-jwt") {
 			post {
 				val id = call.receive<IdPayload>()
 				val done = markAsDone(id.id)
 				if (done) call.respond(HttpStatusCode.OK, id.id)
 				else call.respond(HttpStatusCode.InternalServerError, "Production not marked as done")
-			}
 		}
 	}
 	route("/setNextProduction") {
-		authenticate("auth-jwt") {
 			post {
 				val uid = call.receive<UidPayload>()
 				setNext(uid.uid)
 				call.respond(HttpStatusCode.OK, uid.uid)
 			}
-		}
 	}
 	route("/getProductionQueue") {
-		authenticate("auth-jwt") {
 			get {
 				val production = queryProduction()
 				updateCache(production)
@@ -80,20 +75,16 @@ fun Route.production() {
 				call.application.environment.log.info("$cache")
 				call.respond(HttpStatusCode.OK, cache)
 			}
-		}
 	}
 	route("/getProductionCache") {
-		authenticate("auth-jwt") {
-			get { call.respond(HttpStatusCode.OK, getCache()) }
-		}
+			get { call.respond(HttpStatusCode.OK, getCache())
+			}
 	}
-	authenticate("auth-jwt") {
-		route("/products") {
+	route("/products") {
 			get {
 				val prods = queryProducts()
 				call.respond(HttpStatusCode.OK, prods)
 			}
-		}
 	}
 }
 

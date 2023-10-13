@@ -25,20 +25,15 @@ object OrderCache {
 
 fun Route.order() {
 	route("/order") {
-		authenticate("auth-jwt") {
 			get {
 				val order = getNext()
 				if (order != null) call.respond(order)
 				else call.respond(HttpStatusCode.InternalServerError, "Orders empty")
 			}
-		}
-
-		authenticate("auth-jwt") {
 			post {
 				val order = call.receive<Order>()
 				if (addLast(order)) call.respond(HttpStatusCode.OK, "PoS order stored")
 				else call.respond(HttpStatusCode.InternalServerError, "PoS order not stored")
 			}
-		}
 	}
 }
