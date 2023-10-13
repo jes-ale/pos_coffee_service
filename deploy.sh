@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Define environment variables for container and image names
 CONTAINER="pos_coffee_container"
