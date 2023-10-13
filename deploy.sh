@@ -11,7 +11,13 @@ EXCLUDE_FILES=("README.md" "sync.sh")
 EXCLUDE_DIRECTORIES=("logs" "temp")
 
 # Generate the MD5 hash of the source code, excluding specified files and directories
-find . -type f -not -name "${EXCLUDE_FILES[@]}" -or \( -type d -name "${EXCLUDE_DIRECTORIES[@]}" -prune \) | xargs md5sum > .source_code_hash
+find_command="find . "
+for directory in "${EXCLUDE_DIRECTORIES[@]}"; do
+    find_command+="! -path './$directory*' "
+done
+find_command+=" -type f -not -name '${EXCLUDE_FILES[@]}' -print | xargs md5sum > .source_code_hash"
+
+eval "$find_command"
 
 # Calculate the hash of the Dockerfile and source code
 DOCKERFILE_HASH=$(md5sum Dockerfile | awk '{print $1}')
