@@ -7,8 +7,11 @@ IMAGE="pos_coffee_image"
 # Define an array of files to exclude from MD5 calculation
 EXCLUDE_FILES=("README.md" "sync.sh")
 
-# Generate the MD5 hash of the source code, excluding specified files
-find . -type f -not -name "${EXCLUDE_FILES[@]}" | xargs md5sum > .source_code_hash
+# Define an array of directories to exclude from MD5 calculation
+EXCLUDE_DIRECTORIES=("logs" "temp")
+
+# Generate the MD5 hash of the source code, excluding specified files and directories
+find . -type f -not -name "${EXCLUDE_FILES[@]}" -or \( -type d -name "${EXCLUDE_DIRECTORIES[@]}" -prune \) | xargs md5sum > .source_code_hash
 
 # Calculate the hash of the Dockerfile and source code
 DOCKERFILE_HASH=$(md5sum Dockerfile | awk '{print $1}')
