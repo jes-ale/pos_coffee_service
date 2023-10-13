@@ -1,11 +1,14 @@
 #!/bin/sh
 
-# Author: Jesus Alejos <https://github.com/jes-ale>
-# Script to stop, remove, build, and run a Docker container only if the image has changed.
-
 # Define environment variables for container and image names
 CONTAINER="pos_coffee_container"
 IMAGE="pos_coffee_image"
+
+# Define an array of files to exclude from MD5 calculation
+EXCLUDE_FILES=("README.md" "sync.sh")
+
+# Generate the MD5 hash of the source code, excluding specified files
+find . -type f -not -name "${EXCLUDE_FILES[@]}" | xargs md5sum > .source_code_hash
 
 # Calculate the hash of the Dockerfile and source code
 DOCKERFILE_HASH=$(md5sum Dockerfile | awk '{print $1}')
